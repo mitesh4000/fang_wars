@@ -78,5 +78,6 @@ func main() {
 	server := NewServer()
 	http.Handle("/ws", websocket.Handler(server.handleWs))
 	http.ListenAndServe(":3000", nil)
+	fmt.Println("server started on port 3000")
 
 }
