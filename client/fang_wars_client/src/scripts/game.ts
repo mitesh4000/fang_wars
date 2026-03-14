@@ -1,18 +1,12 @@
 import { sendMove } from "./serverInterface";
 import { PIXEL_SIZE } from "../config";
 import ws from "./wsClient";
+import { isNonEmptyArray } from "./utils";
 
 type PixelCoordinates = {
   row: number;
   column: number;
 };
-
-var headDirection = "U";
-var bodyArray = [
-  { column: 1, row: 1 },
-  { column: 1, row: 2 },
-  { column: 1, row: 3 },
-];
 
 function renderPixel(
   ctx: CanvasRenderingContext2D,
@@ -34,9 +28,11 @@ function renderSnake(
   state: SnakeState, // Array<PixelCoordinates>,
   ctx: CanvasRenderingContext2D,
 ) {
-  console.log("🚀 ~ state:", state.bodyArray);
-  for (let i = 0; i < state.bodyArray.length; i++) {
-    renderDotOnGrid(state.bodyArray[i], ctx);
+  console.log("🚀 ~ state:", state);
+  if (isNonEmptyArray(state.bodyArray)) {
+    for (const pixel of state.bodyArray) {
+      renderDotOnGrid(pixel, ctx);
+    }
   }
 }
 
@@ -51,7 +47,6 @@ function renderDotOnGrid(
     PIXEL_SIZE,
     "rgb(98, 191, 121)",
   );
-  // ctx.fillRect((size + 1) * row, (size + 1) * column, size, size);
 }
 
 function renderGrid(size: number, ctx: CanvasRenderingContext2D) {
@@ -82,6 +77,7 @@ export default function game() {
   ws.onmessage = (event) => {
     if (!context) return;
     const data = JSON.parse(event.data);
+    console.log("🚀 ~ game ~ data:", data);
 
     renderGrid(size, context);
     renderSnake(data, context);
@@ -92,12 +88,12 @@ export default function game() {
       case "ArrowUp":
       case "w":
       case "W":
-        sendMove("F");
+        sendMove("U");
         break;
       case "ArrowDown":
       case "s":
       case "S":
-        sendMove("B");
+        sendMove("D");
         break;
       case "ArrowLeft":
       case "a":

@@ -2,7 +2,7 @@ package network
 
 import (
 	"encoding/json"
-	"fang_wars_server/internal/game"
+	"fang_wars_server/internal/state"
 	"fang_wars_server/internal/types"
 	"log"
 	"net/http"
@@ -40,19 +40,13 @@ func ConnRequestHandler(w http.ResponseWriter, r *http.Request) {
     clientsMutex.Unlock()
 
     for {
-        messageType, message, err := conn.ReadMessage()
+        _, message, err := conn.ReadMessage()
         if err != nil {
             log.Println("Read error:", err)
             break
         }
         log.Printf("Received: %s", message)
 
-        err = conn.WriteMessage(messageType, message)
-
-        if err != nil {
-            log.Println("Write error:", err)
-            break
-        }
         var clientCommand types.ClientCommand
 
 err = json.Unmarshal([]byte(message),&clientCommand);
@@ -61,7 +55,7 @@ err = json.Unmarshal([]byte(message),&clientCommand);
             log.Println("converting to json message:",message)
             break
         }
-        game.GameState.HeadDirection = clientCommand.Direction 
+state.HandleChangeDirection(clientCommand.Direction)
     }
 
     clientsMutex.Lock()

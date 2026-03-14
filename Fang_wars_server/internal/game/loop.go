@@ -1,8 +1,8 @@
 package game
 
 import (
-	"fang_wars_server/internal/game"
 	"fang_wars_server/internal/network"
+	"fang_wars_server/internal/state"
 	"fang_wars_server/internal/types"
 	"fmt"
 	"time"
@@ -13,23 +13,24 @@ var itemCoordinate = types.PixelCoordinates{Column: 1, Row: 1}
 
 // Function to move the snake forward based on its head direction
 func moveSnakeForward() {
-	head := GameState.BodyArray[0]
+	head := state.GameState.BodyArray[0]
 	newHead := types.PixelCoordinates{Column: head.Column, Row: head.Row}
 
-	// Move the head based on the current direction
-	switch GameState.HeadDirection {
-	case "U":
-		newHead.Row--
-	case "D":
-		newHead.Row++
+	// Move the head    based on the current direction
+	switch state.GameState.HeadDirection {
 	case "L":
-		newHead.Column--
+		newHead.Row--
+
 	case "R":
+		newHead.Row++
+	case "D":
 		newHead.Column++
+	case "U":
+		newHead.Column--
 	}
 
 	// Prepend the new head and remove the tail
-	GameState .BodyArray = append([]types.PixelCoordinates{newHead}, GameState .BodyArray[:len(GameState .BodyArray)-1]...)
+	state.GameState.BodyArray = append([]types.PixelCoordinates{newHead}, state.GameState.BodyArray[:len(state.GameState .BodyArray)-1]...)
 }
 
 func GameLoop() {
@@ -40,14 +41,14 @@ func GameLoop() {
 
 		// Broadcast the snake's coordinates
 		msg := types.SnakeState{
-			BodyArray: GameState .BodyArray,
-			HeadDirection:"D",
+			BodyArray: state.GameState .BodyArray,
+			HeadDirection:state.GameState.HeadDirection,
 		}
 		network.Broadcast(msg)
 
-		fmt.Println("game" + game.GameState)
+		fmt.Println(state.GameState )
  
 		count++
-		time.Sleep(time.Second*3)
+		time.Sleep(time.Second/10)
 	}
 }
